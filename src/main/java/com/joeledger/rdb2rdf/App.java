@@ -15,7 +15,32 @@ public class App
         Set<MutableTriple<String, String, String>> rdfTriples = new HashSet<>();
         rdfTriples.add(new MutableTriple<>("a", "b", "c"));
 
-        getTableNames().stream().forEach(System.out::println);
+        Set<String> tableNames = getTableNames();
+        System.out.println(tableNames);
+
+        tableNames.stream().forEach(s -> System.out.println(s + ": " + getAttributeNames(s)));
+    }
+
+
+    public static Set<String> getAttributeNames(String tableName){
+        Set<String> attributeNames = new HashSet<>();
+
+        try {
+            Connection connection = connect();
+
+            String query = String.format("SELECT * FROM %s", tableName);
+            PreparedStatement statement = connection.prepareStatement(query);
+            ResultSet rs = statement.executeQuery();
+            ResultSetMetaData rsmd = rs.getMetaData();
+
+            int columnCount = rsmd.getColumnCount();
+            for (int i = 1; i <= columnCount; i++ ) {
+                attributeNames.add(rsmd.getColumnName(i));
+            }
+            return attributeNames;
+        } catch (Exception e) {
+            return attributeNames;
+        }
     }
 
     public static Set<String> getTableNames(){
