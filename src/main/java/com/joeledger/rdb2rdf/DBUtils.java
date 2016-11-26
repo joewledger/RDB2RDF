@@ -46,7 +46,15 @@ public class DBUtils {
     }
 
     public static Set<String> getPrimaryKeys(String dbName, String tableName) throws SQLException {
-        return null;
+        Set<String> pKeys = new HashSet<>();
+
+        DatabaseMetaData dm = DBUtils.connect(dbName).getMetaData();
+        ResultSet rs = dm.getPrimaryKeys(null, null, tableName);
+        while(rs.next()) {
+            pKeys.add(rs.getString("COLUMN_NAME"));
+        }
+
+        return pKeys;
     }
 
     public static Map<String, String> getForeignKeyConstraints(String dbName, String tableName) throws SQLException {

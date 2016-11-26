@@ -9,7 +9,7 @@ public class Table {
     private String dbName;
     private String tableName;
     private Set<String> primaryKeys;
-    private Map<String, Table> foreignKeyReferences;
+    private Map<String, String> foreignKeyReferences;
     private Set<String> columnSet;
 
     public Table(String dbName, String tableName) {
