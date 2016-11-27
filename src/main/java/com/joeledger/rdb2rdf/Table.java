@@ -20,7 +20,7 @@ public class Table {
         this.columnSet = new HashSet<>();
     }
 
-    private void fillWithMetadata() {
+    public void fillWithMetadata() {
         try {
             setColumnNames();
             setPrimaryKeys();
@@ -31,9 +31,15 @@ public class Table {
     }
 
     public Set<Triple<String, String, String>> getTripleSet() {
-        Set<Triple<String, String, String>> triples = new HashSet<>();
+        return isManyToMany() ? getManyToManyTripleSet() : getStandardTripleSet();
+    }
 
-        return triples;
+    private Set<Triple<String, String, String>> getStandardTripleSet() {
+        return null;
+    }
+
+    private Set<Triple<String, String, String>> getManyToManyTripleSet() {
+        return null;
     }
 
     private boolean isManyToMany() {
