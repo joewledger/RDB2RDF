@@ -2,6 +2,8 @@ package com.joeledger.rdb2rdf;
 
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.tuple.*;
 
 public class Table {
@@ -31,16 +33,47 @@ public class Table {
     }
 
     public Set<Triple<String, String, String>> getTripleSet() {
-        return isManyToMany() ? getManyToManyTripleSet() : getStandardTripleSet();
+        try {
+            return isManyToMany() ? getManyToManyTripleSet() : getStandardTripleSet();
+        } catch (SQLException e){
+            return null;
+        }
     }
 
-    private Set<Triple<String, String, String>> getStandardTripleSet() {
+    private Set<Triple<String, String, String>> getStandardTripleSet() throws SQLException {
         return null;
+
+
     }
 
-    private Set<Triple<String, String, String>> getManyToManyTripleSet() {
-        return null;
+    private Set<Triple<String, String, String>> getManyToManyTripleSet() throws SQLException {
+        Set<Triple<String, String, String>> rdfTriples = new HashSet<>();
+        ResultSet rdbTuples = DBUtils.getFullTableResultSet(this.dbName, this.tableName);
+
+        List<String> referenceColumns = this.foreignKeyReferences.keySet().stream().collect(Collectors.toList());
+
+        while(rdbTuples.next()) {
+            String subject1 = getManyToManySubject(rdbTuples, referenceColumns.get(0));
+            String subject2 = getManyToManySubject(rdbTuples, referenceColumns.get(1));
+
+            String predicate1 = getManyToManyPredicateString(referenceColumns.get(0));
+            String predicate2 = getManyToManyPredicateString(referenceColumns.get(1));
+
+            rdfTriples.add(new ImmutableTriple<>(subject1, predicate1, subject2));
+            rdfTriples.add(new ImmutableTriple<>(subject2, predicate2, subject1));
+        }
+        return rdfTriples;
     }
+
+    private String getManyToManySubject(ResultSet rdbTuples, String referenceColumn) throws SQLException{
+        String referencedTable = this.foreignKeyReferences.get(referenceColumn);
+        return String.format("<%s/%s=%s>", referencedTable, referenceColumn, rdbTuples.getString(referenceColumn));
+    }
+
+    private String getManyToManyPredicateString(String referenceColumn) {
+        return String.format("<%s#%s>", this.foreignKeyReferences.get(referenceColumn), this.tableName);
+    }
+
 
     private boolean isManyToMany() {
         return this.columnSet.size() == this.primaryKeys.size();

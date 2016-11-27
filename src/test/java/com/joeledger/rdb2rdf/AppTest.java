@@ -33,7 +33,13 @@ public class AppTest
     /**
      * Rigourous Test :-)
      */
-    public void testApp() {
-        assertTrue (true);
+    public void testManyToManyConversiont () {
+        String dbName = "chinook.db";
+        String tableName = "playlist_track";
+
+        Table table = new Table(dbName, tableName);
+        table.fillWithMetadata();
+
+        System.out.println(table.getTripleSet());
     }
 }
