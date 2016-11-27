@@ -58,6 +58,16 @@ public class DBUtils {
     }
 
     public static Map<String, String> getForeignKeyConstraints(String dbName, String tableName) throws SQLException {
-        return null;
+        Map<String, String> foreignKeys = new HashMap<>();
+
+        Connection connection = DBUtils.connect(dbName);
+
+        DatabaseMetaData metaData = connection.getMetaData();
+        ResultSet rs = metaData.getImportedKeys(connection.getCatalog(), null, tableName);
+        while (rs.next()) {
+            foreignKeys.put(rs.getString("FKCOLUMN_NAME"),rs.getString("PKTABLE_NAME"));
+        }
+
+        return foreignKeys;
     }
 }
