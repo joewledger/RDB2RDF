@@ -22,11 +22,11 @@ public class Table {
 
     public void fillWithMetadata() {
         try {
-            setColumnNames();
-            setPrimaryKeys();
-            setForeignKeyReferences();
+            this.columnSet = DBUtils.getColumnNames(this.dbName, this.tableName);
+            this.primaryKeys = DBUtils.getPrimaryKeys(this.dbName, this.tableName);
+            this.foreignKeyReferences = DBUtils.getForeignKeyConstraints(this.dbName, this.tableName);
         } catch (SQLException e) {
-            System.out.println("Failed to populate table metadata");
+            e.printStackTrace();
         }
     }
 
@@ -44,18 +44,6 @@ public class Table {
 
     private boolean isManyToMany() {
         return this.columnSet.size() == this.primaryKeys.size();
-    }
-
-    private void setColumnNames() throws SQLException {
-        this.columnSet = DBUtils.getColumnNames(this.dbName, this.tableName);
-    }
-
-    private void setPrimaryKeys() {
-        return;
-    }
-
-    private void setForeignKeyReferences() {
-        return;
     }
 
     public String toString(){
