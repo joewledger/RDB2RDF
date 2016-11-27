@@ -15,6 +15,28 @@ public class DBUtils {
         }
     }
 
+    public static int getRowCount(String dbName, String tableName) {
+        Connection connection = DBUtils.connect(dbName);
+        String query = String.format("SELECT count(*) FROM %s", tableName);
+
+        try {
+            PreparedStatement statement = connection.prepareStatement(query);
+            ResultSet result = statement.executeQuery();
+            return result.getInt(1);
+        } catch (SQLException e) {
+            return -1;
+        }
+    }
+
+
+    public static ResultSet getFullTableResultSet(String dbName, String tableName) throws SQLException{
+        Connection connection = DBUtils.connect(dbName);
+        String query = String.format("SELECT * FROM %s;", tableName);
+        PreparedStatement statement = connection.prepareStatement(query);
+        return statement.executeQuery();
+    }
+
+
     public static Set<String> getTableNames(String dbName) throws SQLException {
         Set<String> tableNames = new HashSet<>();
         Connection connection = DBUtils.connect(dbName);
