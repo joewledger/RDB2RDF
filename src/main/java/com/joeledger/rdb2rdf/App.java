@@ -11,13 +11,11 @@ public class App
 
         String dbName = "chinook.db";
         Set<Triple<String, String, String>> rdfTriples = new HashSet<>();
-        Map<String, Table> tableMap = new HashMap<>();
 
         try {
             for(String tableName : DBUtils.getTableNames(dbName)) {
                 Table table = new Table(dbName, tableName);
                 table.fillWithMetadata();
-                tableMap.put(tableName, table);
                 rdfTriples.addAll(table.getTripleSet());
             }
         } catch (SQLException e) {
