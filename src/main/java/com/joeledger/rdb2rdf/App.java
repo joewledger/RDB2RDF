@@ -16,6 +16,7 @@ public class App
         try {
             for(String tableName : DBUtils.getTableNames(dbName)) {
                 Table table = new Table(dbName, tableName);
+                table.fillWithMetadata();
                 tableMap.put(tableName, table);
                 rdfTriples.addAll(table.getTripleSet());
             }
@@ -24,6 +25,5 @@ public class App
         }
 
         System.out.println(rdfTriples);
-        System.out.println(tableMap);
     }
 }
