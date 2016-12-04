@@ -95,7 +95,7 @@ public class Table {
     private Map<String, String> getValueColPredicates(Set<String> valueColumns) {
         Map<String, String> vcp = new HashMap<>();
         for(String vc : valueColumns) {
-            vcp.put(vc, String.format("%s#%s", this.tableName, vc));
+            vcp.put(vc, String.format("%s:%s", this.tableName, vc));
         }
         return vcp;
     }
@@ -103,7 +103,7 @@ public class Table {
     private Map<String, String> getReferenceColPredicates(Set<String> referenceColumns) {
         Map<String, String> rcp = new HashMap<>();
         for(String rc : referenceColumns) {
-            rcp.put(rc, String.format("%s#ref-%s", this.tableName, rc));
+            rcp.put(rc, String.format("%s:ref-%s", this.tableName, rc));
         }
         return rcp;
     }
@@ -118,7 +118,7 @@ public class Table {
     }
 
     private String getManyToManyPredicateString(String referenceColumn) {
-        return String.format("%s#%s", this.foreignKeyReferences.get(referenceColumn), this.tableName);
+        return String.format("%s:%s", this.foreignKeyReferences.get(referenceColumn), this.tableName);
     }
 
 

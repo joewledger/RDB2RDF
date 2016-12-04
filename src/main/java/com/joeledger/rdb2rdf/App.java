@@ -1,66 +1,69 @@
 package com.joeledger.rdb2rdf;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.sql.*;
 import org.apache.commons.lang3.tuple.*;
-import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.util.URIref;
+import org.apache.jena.query.*;
+import org.apache.jena.rdf.model.*;
 
 public class App 
 {
 
     public static void main( String[] args ) {
 
-        String dbName = "chinook.db";
-        Set<Triple<String, String, String>> rdfTriples = new HashSet<>();
-        RdfModel m = new RdfModel();
+        Set<Triple<String, String, String>> rdfTriples = getRDFTripleSet("chinook.db");
+        Model model = buildModel(rdfTriples);
 
-        if(m.createTdb){ //set createTdb true when creating TDB for the first time
-        	try {
-        		for(String tableName : DBUtils.getTableNames(dbName)) {
-        			Table table = new Table(dbName, tableName);
-        			table.fillWithMetadata();
-        			rdfTriples.addAll(table.getTripleSet());
-        		}
-        	} catch (SQLException e) {
-        		System.out.println("Unable to access database");
-        	}
-        	
-        	/*
-        	 * Works specifically for the string triples generated
-        	 * bad coding 
-        	 */
-        	for (Triple<String, String, String> s : rdfTriples) {
-                //System.out.println(s);
-                String subject = s.getLeft();
-                String predicate = s.getMiddle();
-                String object = s.getRight();
-                
-                if(object!=null){
-                	Pattern pattern = Pattern.compile("(.*?)/(.*?)"); 
-                    Matcher mat = pattern.matcher(object);
-                    if(mat.matches()){ //any object with '/' considered resource else literal
-                    	m.model.createResource(subject)
-                		.addProperty(ResourceFactory.createProperty(predicate), 
-                				ResourceFactory.createResource(object));
-                    }
-                    else {
-                    	m.model.createResource(URIref.encode(subject))
-                    	.addProperty(ResourceFactory.createProperty(predicate), 
-                           		object);
-                    }
-                }
-                else {
-                	object="unknown";
-                	m.model.createResource(URIref.encode(subject))
-                	.addProperty(ResourceFactory.createProperty(predicate), 
-                       		object);
-                }
-                        
-            }
-        }
-        m.query();
+        String query = "SELECT ?name WHERE {?s <customers:City> \"Salt Lake City\" .\n ?s <customers:FirstName> ?name .}";
+        executeQuery(query, model);
     }
+
+    public static Set<Triple<String, String, String>> getRDFTripleSet(String dbName){
+        Set<Triple<String, String, String>> rdfTriples = new HashSet<>();
+
+        try {
+            for(String tableName : DBUtils.getTableNames(dbName)) {
+                Table table = new Table(dbName, tableName);
+                table.fillWithMetadata();
+                rdfTriples.addAll(table.getTripleSet());
+            }
+        } catch (Exception e) {
+            System.out.println("Unable to access database");
+        }
+
+        return rdfTriples;
+    }
+
+    public static Model buildModel(Set<Triple<String, String, String>> tripleSet) {
+        Model model = ModelFactory.createDefaultModel();
+
+        for(Triple<String, String, String> r : tripleSet){
+            if(r.getRight() == null) continue;
+            Resource subject = model.createResource(r.getLeft());
+            Property predicate = model.createProperty(r.getMiddle());
+            RDFNode object = r.getMiddle().equals("rdf:type") ? model.createResource(r.getRight()) : model.createLiteral(r.getRight());
+
+            Statement s = ResourceFactory.createStatement(subject, predicate, object);
+            model.add(s);
+        }
+
+        return model;
+    }
+
+    public static void executeQuery(String qst, Model model){
+        Query query = QueryFactory.create(qst);
+        QueryExecution qexec = QueryExecutionFactory.create(query, model);
+
+        try {
+            ResultSet results = qexec.execSelect();
+            while ( results.hasNext() ) {
+                QuerySolution soln = results.nextSolution();
+                System.out.println(soln);
+            }
+        } finally {
+            qexec.close();
+        }
+    }
+
+
+
 }
