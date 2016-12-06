@@ -1,0 +1,26 @@
+1) Get the names of customers who live in Salt Lake City
+SELECT ?name
+WHERE
+{
+    ?s <customers:City> "Salt Lake City" .
+    ?s <customers:FirstName> ?name .
+}
+
+
+2) Get the names of customers who have purchased a Blues track under 3 minutes long
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+SELECT DISTINCT ?name
+WHERE {
+    ?customer <customers:FirstName> ?name .
+    ?invoice <invoices:ref-CustomerId> ?customer .
+    ?invoice_item <invoice_items:ref-InvoiceId> ?invoice .
+    ?invoice_item <invoice_items:ref-TrackId> ?track .
+    ?track <tracks:Milliseconds> ?time .
+    FILTER(xsd:integer(?time) < 180000) .
+    ?track <tracks:ref-GenreId> ?genre .
+    ?genre <genres:Name> "Blues" .
+}
+ORDER BY asc(?name)
+
+
+3) Get the names of playlists that have songs from at least 3 genres

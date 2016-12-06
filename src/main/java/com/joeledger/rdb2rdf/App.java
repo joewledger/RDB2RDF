@@ -10,25 +10,32 @@ public class App
 
     public static void main( String[] args ) {
 
-        Set<Triple<String, String, String>> rdfTriples = getRDFTripleSet("chinook.db");
-        Model model = buildModel(rdfTriples);
+        Scanner scanner = new Scanner(System.in);
 
-        List<String> queries = new ArrayList<>();
+        System.out.println("Please enter the name of the database to convert to RDF");
+        String dbName = scanner.nextLine();
 
-        queries.add("SELECT ?name WHERE {?s <customers:City> \"Salt Lake City\" .\n"
-                + "?s <customers:FirstName> ?name .}");
+        Model model = buildModel(getRDFTripleSet(dbName));
 
+        System.out.println("Please enter a query");
 
-        queries.add("SELECT DISTINCT ?name WHERE {?customer <customers:FirstName> ?name .\n" +
-                "?invoice <invoices:ref-CustomerId> ?customer .\n" +
-                "?invoice_item <invoice_items:ref-InvoiceId> ?invoice .\n" +
-                "?invoice_item <invoice_items:ref-TrackId> ?track .\n" +
-                "?track <tracks:ref-GenreId> ?genre .\n" +
-                "?genre <genres:Name> \"Blues\" . }" +
-                "ORDER BY asc(?name)");
+        StringBuilder builder = new StringBuilder();
 
-
-        executeQuery(queries.get(1), model);
+        while(true) {
+            String curr = scanner.nextLine();
+            if(curr.equals("")){
+                try {
+                    executeQuery(builder.toString(), model);
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+                builder = new StringBuilder();
+                System.out.println("\nPlease enter another query");
+            } else {
+                builder.append(curr);
+                builder.append("\n");
+            }
+        }
     }
 
     public static Set<Triple<String, String, String>> getRDFTripleSet(String dbName){
@@ -82,7 +89,4 @@ public class App
             qexec.close();
         }
     }
-
-
-
 }

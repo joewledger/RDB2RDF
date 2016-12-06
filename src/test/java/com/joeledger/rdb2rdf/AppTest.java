@@ -49,11 +49,11 @@ public class AppTest
         int rowCount = DBUtils.getRowCount(dbName, tableName);
 
         Assert.assertEquals(rdfTriples.size(), rowCount * 2);
-        Assert.assertEquals(rdfTriples.stream().filter(t -> t.getLeft().startsWith("<playlists/")).count(), rowCount);
-        Assert.assertEquals(rdfTriples.stream().filter(t -> t.getLeft().startsWith("<tracks/")).count(), rowCount);
+        Assert.assertEquals(rdfTriples.stream().filter(t -> t.getLeft().startsWith("playlists/")).count(), rowCount);
+        Assert.assertEquals(rdfTriples.stream().filter(t -> t.getLeft().startsWith("tracks/")).count(), rowCount);
 
         Assert.assertTrue(rdfTriples.stream().allMatch(s -> s.getLeft().substring(0, s.getLeft().indexOf("/"))
-                                                    .equals(s.getMiddle().substring(0, s.getMiddle().indexOf("#")))));
+                                                    .equals(s.getMiddle().substring(0, s.getMiddle().indexOf(":")))));
     }
 
     public void testStandardConversion() throws SQLException{
@@ -79,14 +79,13 @@ public class AppTest
         //Checks that all tuples with the "rdf:type" predicate also have the table name as an object
         Assert.assertTrue(rdfTriples.stream()
                 .filter(t -> t.getMiddle().equals("rdf:type"))
-                .allMatch(t -> t.getRight().equals(String.format("<%s>", tableName))));
+                .allMatch(t -> t.getRight().equals(String.format("%s", tableName))));
 
         //Checks to make sure that all columns except the primary key are used as predicates
         Assert.assertEquals(rdfTriples.stream()
                 .map(Triple::getMiddle)
                 .filter(s -> !s.equals("rdf:type"))
-                .map(s -> s.substring(Math.max(s.indexOf("#") + 1, 0)))
-                .map(s -> s.substring(0, s.endsWith(">") ? s.length() - 1 : s.length()))
+                .map(s -> s.substring(Math.max(s.indexOf(":") + 1, 0)))
                 .map(s -> s.substring(s.startsWith("ref-") ? 4 : 0))
                 .collect(Collectors.toSet()).size() + 1, colCount);
     }
