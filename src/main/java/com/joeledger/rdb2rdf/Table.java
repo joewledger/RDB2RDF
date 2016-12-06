@@ -49,13 +49,11 @@ public class Table {
                 .filter(s -> !referenceColumns.contains(s) && !this.primaryKeys.contains(s))
                 .collect(Collectors.toSet());
 
-        String pKey = this.primaryKeys.stream().collect(Collectors.toList()).get(0);
-
         Map<String, String> valueColPredicates = getValueColPredicates(valueColumns);
         Map<String, String> referenceColPredicates = getReferenceColPredicates(referenceColumns);
 
         while(rdbTuples.next()){
-            String subject = getSubject(rdbTuples, pKey);
+            String subject = getSubject(rdbTuples);
 
             rdfTriples.add(new ImmutableTriple<>(subject, "rdf:type", String.format("%s", this.tableName)));
 
@@ -113,8 +111,24 @@ public class Table {
         return String.format("%s/%s=%s", referencedTable, referenceColumn, rdbTuples.getString(referenceColumn));
     }
 
-    private String getSubject(ResultSet rdbTuples, String pKeyColumn) throws SQLException {
-        return String.format("%s/%s=%s", this.tableName, pKeyColumn, rdbTuples.getString(pKeyColumn));
+    private String getSubject(ResultSet rdbTuples) throws SQLException {
+        List<String> sortedPKeys = this.primaryKeys.stream().sorted().collect(Collectors.toList());
+        boolean first = true;
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(this.tableName);
+        builder.append("/");
+        for(String key : sortedPKeys){
+            if(!first){
+                builder.append(",");
+            }
+            builder.append(key);
+            builder.append("=");
+            builder.append(rdbTuples.getString(key));
+            first = false;
+        }
+
+        return builder.toString();
     }
 
     private String getManyToManyPredicateString(String referenceColumn) {
