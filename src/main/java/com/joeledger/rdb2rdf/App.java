@@ -5,10 +5,14 @@ import org.apache.commons.lang3.tuple.*;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.*;
 
+import org.apache.log4j.*;
+
 public class App 
 {
 
     public static void main( String[] args ) {
+
+        Logger.getRootLogger().setLevel(Level.OFF);
 
         Scanner scanner = new Scanner(System.in);
 
@@ -17,7 +21,7 @@ public class App
 
         Model model = buildModel(getRDFTripleSet(dbName));
 
-        System.out.println("Please enter a query");
+        System.out.println("\nPlease enter a query");
 
         StringBuilder builder = new StringBuilder();
 

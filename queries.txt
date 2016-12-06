@@ -23,4 +23,12 @@ WHERE {
 ORDER BY asc(?name)
 
 
-3) Get the names of playlists that have songs from at least 3 genres
+3) Get the names of playlists that have songs from at least 5 genres
+SELECT DISTINCT ?name
+WHERE {
+    ?playlists <playlists:Name> ?name .
+    ?playlists <playlists:playlist_track> ?track .
+    ?track <tracks:ref-GenreId> ?genre .
+}
+GROUP BY ?name
+HAVING(COUNT(DISTINCT ?genre) >= 5)
