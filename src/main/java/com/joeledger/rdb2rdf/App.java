@@ -29,7 +29,14 @@ public class App
             String curr = scanner.nextLine();
             if(curr.equals("")){
                 try {
-                    executeQuery(builder.toString(), model);
+                    String query = builder.toString();
+                    if(query.contains("{")) {
+                        //Execute a SPARQL query
+                        executeQuery(query, model);
+                    } else {
+                        //Execute a SQL query
+                        DBUtils.executeQuery(dbName, query);
+                    }
                 } catch (Exception e){
                     e.printStackTrace();
                 }
@@ -78,6 +85,7 @@ public class App
 
         return model;
     }
+
 
     public static void executeQuery(String qst, Model model){
         Query query = QueryFactory.create(qst);

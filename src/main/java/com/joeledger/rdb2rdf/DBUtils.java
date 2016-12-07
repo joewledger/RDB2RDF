@@ -15,6 +15,25 @@ public class DBUtils {
         }
     }
 
+    public static void executeQuery(String dbName, String query) throws SQLException {
+        Connection connection = DBUtils.connect(dbName);
+
+        PreparedStatement statement = connection.prepareStatement(query);
+        ResultSet rs = statement.executeQuery();
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int columnsNumber = rsmd.getColumnCount();
+
+        while(rs.next()) {
+            StringBuilder colValues = new StringBuilder();
+            for (int i = 1; i <= columnsNumber; i++) {
+                if (i > 1) colValues.append(",  ");
+                colValues.append(rs.getString(i));
+            }
+            System.out.println(colValues.toString());
+        }
+    }
+
+
     public static int getRowCount(String dbName, String tableName) {
         Connection connection = DBUtils.connect(dbName);
         String query = String.format("SELECT count(*) FROM %s", tableName);

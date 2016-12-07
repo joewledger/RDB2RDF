@@ -6,6 +6,10 @@ WHERE
     ?s <customers:FirstName> ?name .
 }
 
+select C.FirstName
+from customers as C
+where C.City = "Salt Lake City"
+
 
 2) Get the names of customers who have purchased a Blues track under 3 minutes long
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -22,6 +26,11 @@ WHERE {
 }
 ORDER BY asc(?name)
 
+select distinct FirstName
+From customers as C, invoice_items as IT, invoices as I, tracks as T, genres as G
+where C.CustomerId=I.CustomerId and I.Invoiceid=IT.Invoiceid and IT.Trackid=T.Trackid and T.Genreid=G.Genreid and G.Name="Blues" and T.Milliseconds<180000
+order by FirstName
+
 
 3) Get the names of playlists that have songs from at least 5 genres
 SELECT DISTINCT ?name
@@ -32,3 +41,8 @@ WHERE {
 }
 GROUP BY ?name
 HAVING(COUNT(DISTINCT ?genre) >= 5)
+
+select distinct P.Name
+From playlists as P, playlist_track as PT, tracks as T
+where PT.TrackId=T.TrackId and P.PlaylistId=PT.PlaylistId
+group by P.Name having count(distinct T.GenreId)>=5
